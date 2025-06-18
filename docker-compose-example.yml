@@ -1,0 +1,15 @@
+services:
+  myair-to-mqtt:
+    image: <local package repository URL>
+    build: .
+    container_name: myair_to_mqtt
+    restart: unless-stopped
+    environment:
+      # note: LOG_PATH (use in volumes below) is defined in the .env file
+      - TZ=Australia/Melbourne
+    volumes:
+      - ./myair-to-mqtt.yml:/opt/myair-to-mqtt/etc/myair-to-mqtt.yml
+      - ./log:${LOG_PATH}
+
+# vim: ts=2 shiftwidth=2 expandtab
+# END OF FILE

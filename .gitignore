@@ -1,0 +1,9 @@
+myair-to-mqtt.yml
+docker-compose.yml
+
+__pycache__/
+log/
+*.log
+*.log.*
+
+testing/

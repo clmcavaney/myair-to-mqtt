@@ -1,0 +1,6 @@
+pymyair
+Homie4
+argparse
+configparser
+schedule
+PyYAML
