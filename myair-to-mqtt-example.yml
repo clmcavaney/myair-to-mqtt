@@ -1,0 +1,15 @@
+mqtt_settings:
+  MQTT_BROKER: <DNS or IP address of mqtt broker>
+  MQTT_PORT: <TCP port at mqtt broker>
+  MQTT_USERNAME: <user to access MQTT broker>
+  MQTT_PASSWORD: <password for user>
+
+myair_settings:
+  myair_addr: <DNS or IP address of the myair device>
+
+myair_to_mqtt_settings:
+  # in seconds
+  refresh_interval: 30
+
+# vim: ts=2 shiftwidth=2 expandtab
+# END OF FILE
