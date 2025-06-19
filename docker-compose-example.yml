@@ -7,6 +7,7 @@ services:
     environment:
       # note: LOG_PATH (use in volumes below) is defined in the .env file
       - TZ=Australia/Melbourne
+      - LOG_PATH=${LOG_PATH}
     volumes:
       - ./myair-to-mqtt.yml:/opt/myair-to-mqtt/etc/myair-to-mqtt.yml
       - ./log:${LOG_PATH}

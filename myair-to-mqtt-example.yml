@@ -6,6 +6,8 @@ mqtt_settings:
 
 myair_settings:
   myair_addr: <DNS or IP address of the myair device>
+  # used to limit myzone data validation
+  max_zones: 6
 
 myair_to_mqtt_settings:
   # in seconds
