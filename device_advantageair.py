@@ -12,7 +12,7 @@ from homie.node.property.property_integer import Property_Integer
 
 
 FAN_SPEEDS = ['low', 'medium', 'high']
-OPERATION_MODES = ['cool', 'heat', 'fan', 'dry']
+OPERATION_MODES = ['on', 'cool', 'heat', 'fan', 'dry']
 ZONE_STATES = ['open', 'close']
 SYSTEM_MODES = ['on', 'off']
 
@@ -75,9 +75,12 @@ class Device_AdvantageAir(Device_Base):
     debug = False
 
     def __init__(
-        self, device_id=None, name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False
+        self, device_id=None, name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False, myair_settings=None
     ):
         super().__init__(device_id, name, homie_settings, mqtt_settings)
+
+        assert myair_device, "myair_device must be supplied"
+        assert myair_settings, "myair_settings must be supplied"
 
         self.myair_device = myair_device
         self.debug = debug
@@ -94,13 +97,13 @@ class Device_AdvantageAir(Device_Base):
         node = Node_Base(self, 'controls', 'Controls', 'controls')
         self.add_node(node)
         
-        mode = Property_Enum(node, id="mode", name="Mode", data_format=','.join(SYSTEM_MODES), value='off' if 'off' in myair_device.mode else 'on', set_value=lambda value: self.set_mode(value))
+        mode = Property_Enum(node, id="mode", name="Mode", data_format=','.join(OPERATION_MODES), value=myair_device.mode, set_value=lambda value: self.set_mode(value))
         node.add_property(mode)
 
         fan_speed = Property_Enum(node, id="fan-speed", name="Fan Speed", data_format=','.join(FAN_SPEEDS), value=myair_device.fanspeed, set_value=lambda value: self.set_fan_speed(value))
         node.add_property(fan_speed)
 
-        myzone = Property_Integer(node, id="myzone", name="MyZone", value=myair_device.myzone, data_format='1:10', set_value=lambda value: self.set_myzone(value))
+        myzone = Property_Integer(node, id="myzone", name="MyZone", value=myair_device.myzone, data_format='1:{}'.format(myair_settings['max_zones']), set_value=lambda value: self.set_myzone(value))
         node.add_property(myzone)
 
         request_refresh = Property_Button(node, id="requestrefresh", name="Request Refresh", settable=True, set_value=lambda value: self.update())
@@ -173,7 +176,7 @@ class Device_AdvantageAir(Device_Base):
 
         # Controls
         # mode will be one of OPERATION_MODES + 'off' - therefore, if it says off it's off otherwise it must be on
-        self.get_node('controls').get_property('mode').value = 'off' if 'off' in self.myair_device.mode else 'on'
+        self.get_node('controls').get_property('mode').value = self.myair_device.mode
         self.get_node('controls').get_property('fan-speed').value = self.myair_device.fanspeed
 
         # Zones
