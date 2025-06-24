@@ -12,7 +12,7 @@ from homie.node.property.property_integer import Property_Integer
 
 
 FAN_SPEEDS = ['low', 'medium', 'high']
-OPERATION_MODES = ['on', 'cool', 'heat', 'fan', 'dry']
+OPERATION_MODES = ['on', 'off', 'cool', 'heat', 'fan', 'dry']
 ZONE_STATES = ['open', 'close']
 SYSTEM_MODES = ['on', 'off']
 
