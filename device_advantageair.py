@@ -178,6 +178,7 @@ class Device_AdvantageAir(Device_Base):
         # mode will be one of OPERATION_MODES + 'off' - therefore, if it says off it's off otherwise it must be on
         self.get_node('controls').get_property('mode').value = self.myair_device.mode
         self.get_node('controls').get_property('fan-speed').value = self.myair_device.fanspeed
+        self.get_node('controls').get_property('myzone').value = self.myair_device.myzone
 
         # Zones
         for zone_id, zone_det in self.myair_device.zones.items():
