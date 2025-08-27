@@ -49,6 +49,12 @@ class Node_AdvantageAirZone(Node_Base):
             )
         )
 
+        self.add_property(
+            Property_Enum(
+                self, id="zone-mode", name="Zone Mode", data_format=','.join(OPERATION_MODES), settable=False
+            )
+        )
+
     def set_zone_temp_setpoint(self, value):
         if self.debug:
             print('{}: set_zone_temp_setpoint()'.format(self.__class__.__name__))
@@ -64,7 +70,7 @@ class Node_AdvantageAirZone(Node_Base):
 
     def set_zone_state(self, value):
         if self.debug:
-            print('{}: set_zone_temp_state()'.format(self.__class__.__name__))
+            print('{}: set_zone_state()'.format(self.__class__.__name__))
             print(self.name)
         # This is a bit messy - setZone() requires a temperature when just changing the state of the zone (i.e. open or close).  Not sure if this is a limitation in the pymyair wrapper of the AdvantageAir API 
         self.myair_device.setZone(id=self.zone_details['number'], state=value, set_temp=self.zone_details['setTemp'], value=100)
@@ -118,6 +124,9 @@ class Device_AdvantageAir(Device_Base):
             node.get_property('tempsetpoint').value = zone_det['setTemp']
             node.get_property('tempmeasured').value = zone_det['measuredTemp']
             node.get_property('zone-state').value = zone_det['state']
+            # this is a combo of the controls mode and the specific zone
+            # i.e. if the zone is open then it will be the controls mode, if it is closed then it will be off
+            node.get_property('zone-mode').value = myair_device.mode if zone_det['state'] != "close" else "off"
 
             self.add_node(node)
 
@@ -185,6 +194,7 @@ class Device_AdvantageAir(Device_Base):
             self.get_node(zone_id).get_property('tempsetpoint').value = zone_det['setTemp']
             self.get_node(zone_id).get_property('tempmeasured').value = zone_det['measuredTemp']
             self.get_node(zone_id).get_property('zone-state').value = zone_det['state']
+            self.get_node(zone_id).get_property('zone-mode').value = self.myair_device.mode if zone_det['state'] != "close" else "off"
 
         # Status
         self.get_node('status').get_property('systemstatus').value = 'on' if self.myair_device.mode in OPERATION_MODES else 'off'
