@@ -51,7 +51,7 @@ class Node_AdvantageAirZone(Node_Base):
 
         self.add_property(
             Property_Enum(
-                self, id="zone-mode", name="Zone Mode", data_format=','.join(OPERATION_MODES), settable=False
+                self, id="zone-mode", name="Zone Mode", data_format=','.join(OPERATION_MODES), set_value=lambda value: self.set_zone_mode(value)
             )
         )
 
@@ -75,6 +75,15 @@ class Node_AdvantageAirZone(Node_Base):
         # This is a bit messy - setZone() requires a temperature when just changing the state of the zone (i.e. open or close).  Not sure if this is a limitation in the pymyair wrapper of the AdvantageAir API 
         self.myair_device.setZone(id=self.zone_details['number'], state=value, set_temp=self.zone_details['setTemp'], value=100)
 
+    def set_zone_mode(self, value):
+        if self.debug:
+            print('{}: set_zone_mode()'.format(self.__class__.__name__))
+            print(self.name)
+        # Leveraging set_zone_state() logic, but essentially if the mode == off, state will be set to close, otherwise open
+        _zone_state = 'open'
+        if value == 'off':
+            _zone_state = 'close'
+        self.myair_device.setZone(id=self.zone_details['number'], state=_zone_state, set_temp=self.zone_details['setTemp'], value=100)
 
 class Device_AdvantageAir(Device_Base):
     myair_device = None
