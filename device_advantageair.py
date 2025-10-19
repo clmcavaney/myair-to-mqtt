@@ -19,7 +19,7 @@ SYSTEM_MODES = ['on', 'off']
 class Node_AdvantageAirZone(Node_Base):
     zone_details = None
     myair_device = None
-    debug = False
+    debug = None
 
     def __init__(
         self, device, id, name, type_, zone_details, myair_device, debug=False
@@ -55,6 +55,12 @@ class Node_AdvantageAirZone(Node_Base):
             )
         )
 
+        if debug:
+            print('Node_AdvantageAirZone() details: topic:{} controls mode:{}'.format(super().topic, device.get_node('controls').get_property('mode').value))
+            print('super(): {}'.format(super()))
+            print('self.device: {}'.format(self.device))
+            print('Node_AdvantageAirZone() details: alternative method - controls mode:{}'.format(self.device.get_node('controls').get_property('mode').value))
+
     def set_zone_temp_setpoint(self, value):
         if self.debug:
             print('{}: set_zone_temp_setpoint()'.format(self.__class__.__name__))
@@ -70,14 +76,14 @@ class Node_AdvantageAirZone(Node_Base):
 
     def set_zone_state(self, value):
         if self.debug:
-            print('{}: set_zone_state()'.format(self.__class__.__name__))
+            print('{}: set_zone_state() value:{}'.format(self.__class__.__name__, value))
             print(self.name)
         # This is a bit messy - setZone() requires a temperature when just changing the state of the zone (i.e. open or close).  Not sure if this is a limitation in the pymyair wrapper of the AdvantageAir API 
         self.myair_device.setZone(id=self.zone_details['number'], state=value, set_temp=self.zone_details['setTemp'], value=100)
 
     def set_zone_mode(self, value):
         if self.debug:
-            print('{}: set_zone_mode()'.format(self.__class__.__name__))
+            print('{}: set_zone_mode() value:{}'.format(self.__class__.__name__, value))
             print(self.name)
         # Leveraging set_zone_state() logic, but essentially if the mode == off, state will be set to close, otherwise open
         _zone_state = 'open'
@@ -85,9 +91,15 @@ class Node_AdvantageAirZone(Node_Base):
             _zone_state = 'close'
         self.myair_device.setZone(id=self.zone_details['number'], state=_zone_state, set_temp=self.zone_details['setTemp'], value=100)
 
+        # Also, if turning a zone state to another function (heat, cool, vent/fan, dry), set the Homie device node (controls) mode, as that is the overarching ... control
+        # call the appropriate set_value method from the mode property of the appropate "controls" node
+        if value != 'off':
+            self.device.get_node('controls').get_property('mode').set_value(value)
+
+
 class Device_AdvantageAir(Device_Base):
     myair_device = None
-    debug = False
+    debug = None
 
     def __init__(
         self, device_id=None, name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False, myair_settings=None
@@ -128,7 +140,7 @@ class Device_AdvantageAir(Device_Base):
         for zone_id, zone_det in myair_device.zones.items():
             if self.debug:
                 print('about to create a node - Node_AdvantageAirZone({}, {}, {})'.format(zone_id, zone_det['name'], 'zone'))
-            node = Node_AdvantageAirZone(self, zone_id, zone_det['name'], 'zone', zone_det, self.myair_device)
+            node = Node_AdvantageAirZone(self, zone_id, zone_det['name'], 'zone', zone_det, self.myair_device, debug=self.debug)
 
             node.get_property('tempsetpoint').value = zone_det['setTemp']
             node.get_property('tempmeasured').value = zone_det['measuredTemp']
@@ -167,21 +179,21 @@ class Device_AdvantageAir(Device_Base):
 
     def set_mode(self, value):
         if self.debug:
-            print('{}: set_mode()'.format(self.__class__.__name__))
+            print('{}: set_mode() value:{}'.format(self.__class__.__name__, value))
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('mode').value = value
         self.myair_device.mode = value
 
     def set_fan_speed(self, value):
         if self.debug:
-            print('{}: set_fan_speed()'.format(self.__class__.__name__))
+            print('{}: set_fan_speed() value:{}'.format(self.__class__.__name__, value))
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('fan_speed').value = value
         self.myair_device.fanspeed = value
 
     def set_myzone(self, value):
         if self.debug:
-            print('{}: set_myzone()'.format(self.__class__.__name__))
+            print('{}: set_myzone() value:{}'.format(self.__class__.__name__, value))
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('fan_speed').value = value
         self.myair_device.myzone = value
