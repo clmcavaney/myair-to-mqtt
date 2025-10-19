@@ -13,7 +13,7 @@ import homie
 import schedule
 import logging
 
-_version=0.7
+_version=0.8
 _logger = logging.getLogger(__name__)
 # default debugging level is:
 _debug_level = logging.WARNING
