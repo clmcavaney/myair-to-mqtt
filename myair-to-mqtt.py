@@ -12,7 +12,7 @@ import time
 import homie
 import schedule
 
-_version=0.1
+_version=0.6
 _logger = logging.getLogger(__name__)
 _debug_level = logging.WARNING
 _debug_level = logging.INFO
