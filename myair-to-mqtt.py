@@ -11,12 +11,14 @@ from device_advantageair import Device_AdvantageAir
 import time
 import homie
 import schedule
+import logging
 
 _version=0.7
 _logger = logging.getLogger(__name__)
+# default debugging level is:
 _debug_level = logging.WARNING
-_debug_level = logging.INFO
-_debug_level = logging.DEBUG
+#_debug_level = logging.INFO
+#_debug_level = logging.DEBUG
 
 def main():
     global _version
@@ -32,11 +34,18 @@ def main():
 
     # setup variables from the command line arguments
     debug = args.debug
+    # if specified as a parameter, add more debugs
     if debug:
         _debug_level = logging.DEBUG
     config_file_path = args.config_file
 
     _logger.setLevel(_debug_level)
+    # need to figure out how to set debugging on the down stream classes
+    # logger is defined in the Homie4 library - specifically device_base.py
+    # _debug_level is set in the myair-to-mqtt.py code
+    logging.getLogger('homie.device_base').setLevel(_debug_level)
+
+
     FORMATTER = logging.Formatter('%(asctime)s: %(name)s: %(levelname)s: %(message)s')
 #    LOG_FILE = '{}.log'.format(__name__)
     LOG_FILE_NAME = '{}.log'.format(os.path.basename(__file__))
@@ -86,7 +95,7 @@ def main():
     ma = MyAir(myair_settings['myair_addr'])
     ma.update()
 
-    _myair_device = Device_AdvantageAir(device_id='advantageair', name='AdvantageAir', mqtt_settings=mqtt_settings, myair_device=ma, myair_settings=myair_settings)
+    _myair_device = Device_AdvantageAir(device_id='advantageair', name='AdvantageAir', mqtt_settings=mqtt_settings, myair_device=ma, myair_settings=myair_settings, debug=debug)
 
     return _myair_device, myair_to_mqtt_settings
 
