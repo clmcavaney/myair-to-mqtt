@@ -24,6 +24,11 @@ class Node_AdvantageAirZone(Node_Base):
     def __init__(
         self, device, id, name, type_, zone_details, myair_device, debug=False
     ):
+        assert device, 'Homie device required'
+        assert id, 'id for node required'
+        assert name, 'name for node required'
+        assert type_, 'type for node required'
+
         # can't use self.debug here as the class variable hasn't been initialised at this point
         if debug:
             print('{}: device {} id {} name {} type {}'.format(__class__.__name__, device, id, name, type))
@@ -104,10 +109,12 @@ class Device_AdvantageAir(Device_Base):
     def __init__(
         self, device_id=None, name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False, myair_settings=None
     ):
-        super().__init__(device_id, name, homie_settings, mqtt_settings)
+        assert device_id, 'device id required'
+        assert device_name, 'device name required'
+        assert myair_device, 'myair_device must be supplied'
+        assert myair_settings, 'myair_settings must be supplied'
 
-        assert myair_device, "myair_device must be supplied"
-        assert myair_settings, "myair_settings must be supplied"
+        super().__init__(device_id, name, homie_settings, mqtt_settings)
 
         self.myair_device = myair_device
         self.debug = debug
