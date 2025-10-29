@@ -32,6 +32,7 @@
             run: |
               TAG=$(git describe --tags --abbrev=0 --match "v*") # Adjust "v*" pattern as needed
               echo "LAST_ANNOTATED_TAG=$TAG" >> $GITHUB_OUTPUT
+              echo "Last tag $TAG"
 
 #          - name: Setup SSH agent
 #            uses: webfactory/ssh-agent@v0.9.0
