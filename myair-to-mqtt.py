@@ -43,7 +43,12 @@ def main():
     # need to figure out how to set debugging on the down stream classes
     # logger is defined in the Homie4 library - specifically device_base.py
     # _debug_level is set in the myair-to-mqtt.py code
-    logging.getLogger('homie.device_base').setLevel(_debug_level)
+#    print(logging.root.manager.loggerDict)
+#    print(logging.root.manager.loggerDict['homie.device_base'])
+#    logging.getLogger('homie.device_base').setLevel(_debug_level)
+#    logging.getLogger('homie').setLevel(_debug_level)
+    logging.basicConfig(level=_debug_level)
+#    print(logging.root.manager.loggerDict['homie.device_base'])
 
 
     FORMATTER = logging.Formatter('%(asctime)s: %(name)s: %(levelname)s: %(message)s')
