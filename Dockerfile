@@ -1,7 +1,11 @@
 FROM python:3.10-alpine
 LABEL io.figntigger.image.authors="christopher@hodgemcavaney.id.au" \
-		maintainer="Christopher McAvaney <christopher@hodgemcavaney.id.au>" \
-		description="MyAir to MQTT"
+	maintainer="Christopher McAvaney <christopher@hodgemcavaney.id.au>" \
+	description="MyAir to MQTT" \
+	org.opencontainers.image.description="MyAir to MQTT" \
+	org.opencontainers.image.authors="Christopher McAvaney <christopher@hodgemcavaney.id.au>" \
+	org.opencontainers.image.url="https://git.figntigger.io/chrismc/-/packages/container/myair-to-mqtt" \
+	org.opencontainers.image.source="https://git.figntigger.io/chrismc/myair-to-mqtt"
 
 WORKDIR /code
 
