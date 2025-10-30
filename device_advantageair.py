@@ -107,14 +107,14 @@ class Device_AdvantageAir(Device_Base):
     debug = None
 
     def __init__(
-        self, device_id=None, name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False, myair_settings=None
+        self, device_id=None, device_name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False, myair_settings=None
     ):
         assert device_id, 'device id required'
         assert device_name, 'device name required'
         assert myair_device, 'myair_device must be supplied'
         assert myair_settings, 'myair_settings must be supplied'
 
-        super().__init__(device_id, name, homie_settings, mqtt_settings)
+        super().__init__(device_id, device_name, homie_settings, mqtt_settings)
 
         self.myair_device = myair_device
         self.debug = debug
