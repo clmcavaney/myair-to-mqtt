@@ -1,5 +1,7 @@
 myair-to-mqtt.yml
 docker-compose.yml
+.env
+myair-to-mqtt.env
 
 __pycache__/
 *.log
