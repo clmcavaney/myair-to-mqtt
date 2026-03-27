@@ -74,8 +74,8 @@ def main():
 
     HOMIE_SETTINGS = {
         'update_interval': 60,
-        'implementation': 'MyAir to MQTT {} Homie 4 Version {}'.format(_version, homie.__version__),
-        'fw_name': 'MyAir',
+        'implementation': 'MyAir to MQTT {} - Python Homie 4 (v{})'.format(_version, homie.__version__),
+        'fw_name': 'MyAir2MQTT',
         'fw_version':_version,
     }
 
@@ -100,7 +100,7 @@ def main():
     ma = MyAir(myair_settings['myair_addr'])
     ma.update()
 
-    _myair_device = Device_AdvantageAir(device_id='advantageair', device_name='AdvantageAir', mqtt_settings=mqtt_settings, myair_device=ma, myair_settings=myair_settings, debug=debug)
+    _myair_device = Device_AdvantageAir(device_id='advantageair', device_name='AdvantageAir', homie_settings=HOMIE_SETTINGS, mqtt_settings=mqtt_settings, myair_device=ma, myair_settings=myair_settings, debug=debug)
 
     return _myair_device, myair_to_mqtt_settings
 
