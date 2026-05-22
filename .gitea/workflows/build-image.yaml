@@ -12,7 +12,7 @@
         runs-on: ubuntu-latest # Or your custom runner label if using a self-hosted runner
         steps:
           - name: Show runner name
-            run: echo "This job is running on runner ${{ gitea.runner.name }}"
+            run: echo "This job is running on runner ${{ runner.name }} with OS ${{ runner.os }}"
 
           - name: Checkout repository
             uses: actions/checkout@v4
