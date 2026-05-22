@@ -65,7 +65,7 @@ class Node_AdvantageAirZone(Node_Base):
         # note: value will be set when zone state is first changed after this device starts
         self.add_property(
             Property_DateTime(
-                self, id="zone-state-change-ts", name="Zone State Change Timestamp"
+                self, id="zone-state-change-ts", name="Zone State Change Timestamp", settable=True, set_value=lambda value: self.set_zone_state_change_ts(value)
             )
         )
 
@@ -112,6 +112,14 @@ class Node_AdvantageAirZone(Node_Base):
         if value != 'off':
             self.device.get_node('controls').get_property('mode').set_value(value)
 
+    def set_zone_state_change_ts(self, value):
+        if self.debug:
+            print('{}: set_zone_mode() value:{}'.format(self.__class__.__name__, value))
+            print(self.name)
+           
+        # value isn't important, when this function is called the ts value just needs to be updated
+        self.get_property('zone-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
+
 
 class Device_AdvantageAir(Device_Base):
     myair_device = None
@@ -155,7 +163,7 @@ class Device_AdvantageAir(Device_Base):
         node.add_property(request_refresh)
 
         # note: value will be set when mode state is first changed after this device starts
-        mode_state_change_ts = Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp")
+        mode_state_change_ts = Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp", settable=True, set_value=lambda value: self.set_mode_state_change_ts(value))
         node.add_property(mode_state_change_ts)
 
         # Zones
@@ -223,6 +231,12 @@ class Device_AdvantageAir(Device_Base):
         # self.get_node('controls').get_property('fan_speed').value = value
         self.myair_device.myzone = value
 
+    def set_mode_state_change_ts(self, value):
+        if self.debug:
+            print('{}: set_mode_state_change_ts() value:{}'.format(self.__class__.__name__, value))
+        
+        self.get_node('controls').get_property('mode-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
+
     def update(self):
         if self.debug:
             print('{}: update()'.format(self.__class__.__name__))
@@ -231,6 +245,9 @@ class Device_AdvantageAir(Device_Base):
 
         # Controls
         # mode will be one of OPERATION_MODES + 'off' - therefore, if it says off it's off otherwise it must be on
+        current_homie_mode_state = self.get_node('controls').get_property('mode').value
+        if current_homie_mode_state != self.myair_device.mode:
+            self.get_node('controls').get_property('mode-state-change-ts').set_value(True)
         self.get_node('controls').get_property('mode').value = self.myair_device.mode
         self.get_node('controls').get_property('fan-speed').value = self.myair_device.fanspeed
         self.get_node('controls').get_property('myzone').value = self.myair_device.myzone
@@ -239,6 +256,10 @@ class Device_AdvantageAir(Device_Base):
         for zone_id, zone_det in self.myair_device.zones.items():
             self.get_node(zone_id).get_property('tempsetpoint').value = zone_det['setTemp']
             self.get_node(zone_id).get_property('tempmeasured').value = zone_det['measuredTemp']
+            current_homie_zone_state = self.get_node(zone_id).get_property('zone-state').value
+            # this will update the zone state change time, if it in fact has changed
+            if current_homie_zone_state != zone_det['state']:
+                self.get_node(zone_id).get_property('zone-state-change-ts').set_value(True)
             self.get_node(zone_id).get_property('zone-state').value = zone_det['state']
             self.get_node(zone_id).get_property('zone-mode').value = self.myair_device.mode if zone_det['state'] != "close" else "off"
 
