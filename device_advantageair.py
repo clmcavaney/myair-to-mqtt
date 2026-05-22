@@ -65,7 +65,7 @@ class Node_AdvantageAirZone(Node_Base):
         # note: value will be set when zone state is first changed after this device starts
         self.add_property(
             Property_DateTime(
-                self, id="zone-state-change-ts", name="Zone State Change Timestamp", settable=True, set_value=lambda value: self.set_zone_state_change_ts(value)
+                self, id="zone-state-change-ts", name="Zone State Change Timestamp"
             )
         )
 
@@ -95,7 +95,7 @@ class Node_AdvantageAirZone(Node_Base):
             print(self.name)
         # This is a bit messy - setZone() requires a temperature when just changing the state of the zone (i.e. open or close).  Not sure if this is a limitation in the pymyair wrapper of the AdvantageAir API 
         self.myair_device.setZone(id=self.zone_details['number'], state=value, set_temp=self.zone_details['setTemp'], value=100)
-        self.get_property('zone-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
+        self.set_zone_state_change_ts(True)
 
     def set_zone_mode(self, value):
         if self.debug:
@@ -114,7 +114,7 @@ class Node_AdvantageAirZone(Node_Base):
 
     def set_zone_state_change_ts(self, value):
         if self.debug:
-            print('{}: set_zone_mode() value:{}'.format(self.__class__.__name__, value))
+            print('{}: set_zone_state_change_ts() value:{}'.format(self.__class__.__name__, value))
             print(self.name)
            
         # value isn't important, when this function is called the ts value just needs to be updated
@@ -149,22 +149,27 @@ class Device_AdvantageAir(Device_Base):
         # Controls
         node = Node_Base(self, 'controls', 'Controls', 'controls')
         self.add_node(node)
-        
-        mode = Property_Enum(node, id="mode", name="Mode", data_format=','.join(OPERATION_MODES), value=myair_device.mode, set_value=lambda value: self.set_mode(value))
-        node.add_property(mode)
 
-        fan_speed = Property_Enum(node, id="fan-speed", name="Fan Speed", data_format=','.join(FAN_SPEEDS), value=myair_device.fanspeed, set_value=lambda value: self.set_fan_speed(value))
-        node.add_property(fan_speed)
+        node.add_property(
+            Property_Enum(node, id="mode", name="Mode", data_format=','.join(OPERATION_MODES), value=myair_device.mode, set_value=lambda value: self.set_mode(value))
+        )
 
-        myzone = Property_Integer(node, id="myzone", name="MyZone", value=myair_device.myzone, data_format='1:{}'.format(myair_settings['max_zones']), set_value=lambda value: self.set_myzone(value))
-        node.add_property(myzone)
+        node.add_property(
+            Property_Enum(node, id="fan-speed", name="Fan Speed", data_format=','.join(FAN_SPEEDS), value=myair_device.fanspeed, set_value=lambda value: self.set_fan_speed(value))
+        )
 
-        request_refresh = Property_Button(node, id="requestrefresh", name="Request Refresh", settable=True, set_value=lambda value: self.update())
-        node.add_property(request_refresh)
+        node.add_property(
+            Property_Integer(node, id="myzone", name="MyZone", value=myair_device.myzone, data_format='1:{}'.format(myair_settings['max_zones']), set_value=lambda value: self.set_myzone(value))
+        )
+
+        node.add_property(
+            Property_Button(node, id="requestrefresh", name="Request Refresh", settable=True, set_value=lambda value: self.update())
+        )
 
         # note: value will be set when mode state is first changed after this device starts
-        mode_state_change_ts = Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp", settable=True, set_value=lambda value: self.set_mode_state_change_ts(value))
-        node.add_property(mode_state_change_ts)
+        node.add_property(
+            Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp")
+        )
 
         # Zones
         for zone_id, zone_det in myair_device.zones.items():
@@ -181,29 +186,17 @@ class Device_AdvantageAir(Device_Base):
 
             self.add_node(node)
 
-            """
-            node = Node_Base(self, zone_id, zone_det['name'], 'zone')
-            self.add_node(node)
-
-            zone_set_temp = Property_Setpoint(node, id='tempsetpoint', name='Temperature Setpoint', unit='C', value=zone_det['setTemp'], set_value=lambda value: self.set_zone_temp_setpoint(value))
-            node.add_property(zone_set_temp)
-
-            zone_measured_temp = Property_Temperature(node, id='tempmeasured', name='Temperature Measured', unit='C', value=zone_det['measuredTemp'])
-            node.add_property(zone_measured_temp)
-
-            zone_state = Property_Enum(node, id='zone-state', name="Zone State", data_format=','.join(ZONE_STATES), value=zone_det['state'], set_value=lambda value: self.set_zone_state(value))
-            node.add_property(zone_state)
-            """
-
         # Status
         node = Node_Base(self, 'status', 'Status', 'status')
         self.add_node(node)
 
-        system_status = Property_String(node, id='systemstatus', name='System Status', value='on' if myair_device.mode in OPERATION_MODES else 'off')
-        node.add_property(system_status)
+        node.add_property(
+            Property_String(node, id='systemstatus', name='System Status', value='on' if myair_device.mode in OPERATION_MODES else 'off')
+        )
 
-        last_update = Property_String(node, id='lastupdate', name='Last Update', value=datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime("%d/%m/%Y %H:%M:%S%z"))
-        node.add_property(last_update)
+        node.add_property(
+            Property_String(node, id='lastupdate', name='Last Update', value=self.get_status_lastupdate_ts())
+        )
 
         self.start()
 
@@ -215,7 +208,7 @@ class Device_AdvantageAir(Device_Base):
         self.myair_device.mode = value
 
         # only update the state change timestamp when the mode is changed (aka set)
-        self.get_node('controls').get_property('mode-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
+        self.set_mode_stage_change_ts(True)
 
     def set_fan_speed(self, value):
         if self.debug:
@@ -237,6 +230,9 @@ class Device_AdvantageAir(Device_Base):
         
         self.get_node('controls').get_property('mode-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
 
+    def get_status_lastupdate_ts(self):
+        return datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime("%d/%m/%Y %H:%M:%S%z")
+
     def update(self):
         if self.debug:
             print('{}: update()'.format(self.__class__.__name__))
@@ -247,7 +243,7 @@ class Device_AdvantageAir(Device_Base):
         # mode will be one of OPERATION_MODES + 'off' - therefore, if it says off it's off otherwise it must be on
         current_homie_mode_state = self.get_node('controls').get_property('mode').value
         if current_homie_mode_state != self.myair_device.mode:
-            self.get_node('controls').get_property('mode-state-change-ts').set_value(True)
+            self.set_mode_state_change_ts(True)
         self.get_node('controls').get_property('mode').value = self.myair_device.mode
         self.get_node('controls').get_property('fan-speed').value = self.myair_device.fanspeed
         self.get_node('controls').get_property('myzone').value = self.myair_device.myzone
@@ -259,13 +255,13 @@ class Device_AdvantageAir(Device_Base):
             current_homie_zone_state = self.get_node(zone_id).get_property('zone-state').value
             # this will update the zone state change time, if it in fact has changed
             if current_homie_zone_state != zone_det['state']:
-                self.get_node(zone_id).get_property('zone-state-change-ts').set_value(True)
+                self.get_node(zone_id).set_zone_state_change_ts(True)
             self.get_node(zone_id).get_property('zone-state').value = zone_det['state']
             self.get_node(zone_id).get_property('zone-mode').value = self.myair_device.mode if zone_det['state'] != "close" else "off"
 
         # Status
         self.get_node('status').get_property('systemstatus').value = 'on' if self.myair_device.mode in OPERATION_MODES else 'off'
-        self.get_node('status').get_property('lastupdate').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime("%d/%m/%Y %H:%M:%S%z")
+        self.get_node('status').get_property('lastupdate').value = self.get_status_lastupdate_ts()
 
 # vim: expandtab
 # END OF FILE
