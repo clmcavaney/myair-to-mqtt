@@ -1,4 +1,5 @@
 import datetime
+import zoneinfo
 
 from homie.device_base import Device_Base
 from homie.node.node_base import Node_Base
@@ -9,6 +10,7 @@ from homie.node.property.property_enum import Property_Enum
 from homie.node.property.property_string import Property_String
 from homie.node.property.property_button import Property_Button
 from homie.node.property.property_integer import Property_Integer
+from homie.node.property.property_datetime import Property_DateTime
 
 
 FAN_SPEEDS = ['low', 'medium', 'high']
@@ -143,6 +145,10 @@ class Device_AdvantageAir(Device_Base):
         request_refresh = Property_Button(node, id="requestrefresh", name="Request Refresh", settable=True, set_value=lambda value: self.update())
         node.add_property(request_refresh)
 
+        # note: set_value will initially set the time when this device starts
+        mode_state_change_ts = Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp", value=datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f'))
+        node.add_property(mode_state_change_ts)
+
         # Zones
         for zone_id, zone_det in myair_device.zones.items():
             if self.debug:
@@ -179,7 +185,7 @@ class Device_AdvantageAir(Device_Base):
         system_status = Property_String(node, id='systemstatus', name='System Status', value='on' if myair_device.mode in OPERATION_MODES else 'off')
         node.add_property(system_status)
 
-        last_update = Property_String(node, id='lastupdate', name='Last Update', value=datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+        last_update = Property_String(node, id='lastupdate', name='Last Update', value=datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime("%d/%m/%Y %H:%M:%S%z"))
         node.add_property(last_update)
 
         self.start()
@@ -190,6 +196,9 @@ class Device_AdvantageAir(Device_Base):
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('mode').value = value
         self.myair_device.mode = value
+
+        # only update the state change timestamp when the mode is changed (aka set)
+        self.myair_device.mode_state_change_ts = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
 
     def set_fan_speed(self, value):
         if self.debug:
@@ -226,7 +235,7 @@ class Device_AdvantageAir(Device_Base):
 
         # Status
         self.get_node('status').get_property('systemstatus').value = 'on' if self.myair_device.mode in OPERATION_MODES else 'off'
-        self.get_node('status').get_property('lastupdate').value = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        self.get_node('status').get_property('lastupdate').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime("%d/%m/%Y %H:%M:%S%z")
 
 # vim: expandtab
 # END OF FILE
