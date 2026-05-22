@@ -14,7 +14,7 @@ from homie.node.property.property_datetime import Property_DateTime
 
 
 FAN_SPEEDS = ['low', 'medium', 'high']
-OPERATION_MODES = ['on', 'off', 'cool', 'heat', 'vent', 'dry']
+OPERATION_MODES = ['on', 'off', 'cool', 'heat', 'fan', 'dry']
 ZONE_STATES = ['open', 'close']
 SYSTEM_MODES = ['on', 'off']
 
@@ -207,7 +207,7 @@ class Device_AdvantageAir(Device_Base):
         self.myair_device.mode = value
 
         # only update the state change timestamp when the mode is changed (aka set)
-        self.myair_device.mode_state_change_ts = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
+        self.get_node('controls').get_property('mode-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
 
     def set_fan_speed(self, value):
         if self.debug:
