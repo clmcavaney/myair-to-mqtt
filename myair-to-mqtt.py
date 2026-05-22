@@ -28,7 +28,7 @@ def main():
     parser = argparse.ArgumentParser(description='Wrapper for Advantage Air to MQTT', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--version', action='version', version='%(prog)s {}'.format(_version))
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='Turn on debugging')
-    parser.add_argument('-c', '--conf', dest='config_file', required=True, help='Specify the config file')
+    parser.add_argument('-c', '--conf', dest='config_file', required=True, help='Specify the YAML config file')
 
     args = parser.parse_args()
 
