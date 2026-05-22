@@ -62,6 +62,14 @@ class Node_AdvantageAirZone(Node_Base):
             )
         )
 
+        # note: value will be set when zone state is first changed after this device starts
+        self.add_property(
+            Property_DateTime(
+                self, id="zone-state-change-ts", name="Zone State Change Timestamp"
+            )
+        )
+
+
         if debug:
             print('Node_AdvantageAirZone() details: topic:{} controls mode:{}'.format(super().topic, device.get_node('controls').get_property('mode').value))
             print('super(): {}'.format(super()))
@@ -87,6 +95,7 @@ class Node_AdvantageAirZone(Node_Base):
             print(self.name)
         # This is a bit messy - setZone() requires a temperature when just changing the state of the zone (i.e. open or close).  Not sure if this is a limitation in the pymyair wrapper of the AdvantageAir API 
         self.myair_device.setZone(id=self.zone_details['number'], state=value, set_temp=self.zone_details['setTemp'], value=100)
+        self.get_property('zone-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
 
     def set_zone_mode(self, value):
         if self.debug:
@@ -145,8 +154,8 @@ class Device_AdvantageAir(Device_Base):
         request_refresh = Property_Button(node, id="requestrefresh", name="Request Refresh", settable=True, set_value=lambda value: self.update())
         node.add_property(request_refresh)
 
-        # note: set_value will initially set the time when this device starts
-        mode_state_change_ts = Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp", value=datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f'))
+        # note: value will be set when mode state is first changed after this device starts
+        mode_state_change_ts = Property_DateTime(node, id="mode-state-change-ts", name="Mode State Change Timestamp")
         node.add_property(mode_state_change_ts)
 
         # Zones
