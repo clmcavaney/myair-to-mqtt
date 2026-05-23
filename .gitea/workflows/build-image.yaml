@@ -37,10 +37,10 @@
               echo "LAST_ANNOTATED_TAG=$TAG" >> $GITHUB_OUTPUT
               echo "Last tag $TAG"
 
-#          - name: Setup SSH agent
-#            uses: webfactory/ssh-agent@v0.9.0
-#            with:
-#              ssh-private-key: ${{ secrets.DOCKER_IMAGE_BUILDS_SSH_KEY }}
+          - name: Setup SSH agent
+            uses: webfactory/ssh-agent@v0.9.0
+            with:
+              ssh-private-key: ${{ secrets.DOCKER_IMAGE_BUILDS_SSH_KEY }}
 
           - name: Build and push Docker image
             uses: docker/build-push-action@v5
@@ -53,7 +53,7 @@
                 git.figntigger.io/chrismc/${{ github.event.repository.name }}:latest
               platforms: linux/amd64
 #              platforms: linux/amd64,linux/arm/v6,linux/arm/v7
-#              ssh: default
+              ssh: default
               # Optionally, add build arguments or target stages
               # build-args: |
               #   MY_ARG=value
