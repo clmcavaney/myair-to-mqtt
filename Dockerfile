@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.12-alpine
 LABEL io.figntigger.image.authors="christopher@hodgemcavaney.id.au" \
 	maintainer="Christopher McAvaney <christopher@hodgemcavaney.id.au>" \
 	description="MyAir to MQTT" \
@@ -13,13 +13,17 @@ COPY requirements.txt requirements.txt
 
 # procps - needed for pgrep HEALTHCHECK command
 # the "apk del build-dependencies" removes packages that were only needed for the build process
-RUN apk add --no-cache procps \
+RUN --mount=type=ssh apk add --no-cache procps \
 	&& apk add --no-cache --virtual build-dependencies \
 		gcc \
 		python3-dev \
 		musl-dev \
 		linux-headers \
 		git \
+		openssh-client \
+	# Add the git provider to known_hosts to avoid authenticity prompts
+	&& mkdir -p -m 0600 ~/.ssh \
+	&& ssh-keyscan github.com >> ~/.ssh/known_hosts \
 	&& pip install --no-cache-dir --requirement requirements.txt \
 	&& apk del build-dependencies
 
