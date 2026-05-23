@@ -15,6 +15,9 @@
           - name: Show runner name
             run: echo "This job is running on runner ${{ runner.name }} with OS ${{ runner.os }}"
 
+          - name: Show runner name
+            run: echo "This job is running on runner $RUNNER_NAME with OS $RUNNER_OS"
+
           - name: Checkout repository
             uses: actions/checkout@v4
 
