@@ -1,4 +1,8 @@
-pymyair
+#pymyair
+# HTTPS method
+#git+https://github.com/clmcavaney/pymyair.git@vent-to-fan
+# SSH method
+git+ssh://git@github.com/clmcavaney/pymyair.git@vent-to-fan
 Homie4
 argparse
 configparser
