@@ -208,7 +208,7 @@ class Device_AdvantageAir(Device_Base):
         self.myair_device.mode = value
 
         # only update the state change timestamp when the mode is changed (aka set)
-        self.set_mode_stage_change_ts(True)
+        self.set_mode_state_change_ts(True)
 
     def set_fan_speed(self, value):
         if self.debug:
