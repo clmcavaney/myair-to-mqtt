@@ -93,9 +93,16 @@ class Node_AdvantageAirZone(Node_Base):
         if self.debug:
             print('{}: set_zone_state() value:{}'.format(self.__class__.__name__, value))
             print(self.name)
+            print('set_zone_state(): current value == {}'.format(self.get_property('zone-state').value))
+
+        current_homie_zone_state = self.get_property('zone-state').value
+
         # This is a bit messy - setZone() requires a temperature when just changing the state of the zone (i.e. open or close).  Not sure if this is a limitation in the pymyair wrapper of the AdvantageAir API 
         self.myair_device.setZone(id=self.zone_details['number'], state=value, set_temp=self.zone_details['setTemp'], value=100)
-        self.set_zone_state_change_ts(True)
+
+        # only update the zone state timestamp when there is a change
+        if current_homie_zone_state != value:
+            self.set_zone_state_change_ts(True)
 
     def set_zone_mode(self, value):
         if self.debug:
@@ -203,12 +210,17 @@ class Device_AdvantageAir(Device_Base):
     def set_mode(self, value):
         if self.debug:
             print('{}: set_mode() value:{}'.format(self.__class__.__name__, value))
+            print('set_mode(): current value == {}'.format(self.get_node('controle').get_property('mode').value))
+
+        current_homie_mode_state = self.get_node('controls').get_property('mode').value
+
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('mode').value = value
         self.myair_device.mode = value
 
-        # only update the state change timestamp when the mode is changed (aka set)
-        self.set_mode_state_change_ts(True)
+        # only update the state change timestamp when the mode is changed
+        if current_homie_mode_state != value:
+            self.set_mode_state_change_ts(True)
 
     def set_fan_speed(self, value):
         if self.debug:
