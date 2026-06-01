@@ -4,7 +4,7 @@
 # SSH method
 git+ssh://git@github.com/clmcavaney/pymyair.git@vent-to-fan
 #Homie4
-git+ssh://git@github.com:clmcavaney/Homie4.git@updates-property-value-order
+git+ssh://git@github.com/clmcavaney/Homie4.git@updates-property-value-order
 argparse
 configparser
 schedule
