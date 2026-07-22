@@ -249,7 +249,15 @@ class Device_AdvantageAir(Device_Base):
         if self.debug:
             print('{}: update()'.format(self.__class__.__name__))
 
-        self.myair_device.update()
+        # sometimes the device isn't contactable - handle that here
+        try:
+            self.myair_device.update()
+        except requests.exceptions.ConnectionError as e:
+            if self.debug:
+                print('{}: unable to get update from myair_device'.format(self.__class__.__name__))
+                print('{}: exception: {}'.format(self.__class__.__name__, e))
+            # silently ignore
+            return
 
         # Controls
         # mode will be one of OPERATION_MODES + 'off' - therefore, if it says off it's off otherwise it must be on
