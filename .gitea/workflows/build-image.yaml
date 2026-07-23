@@ -13,12 +13,6 @@
         runs-on: ubuntu-latest # Or your custom runner label if using a self-hosted runner
         steps:
           - name: Show runner name
-            run: echo "This job is running on runner ${{ runner.name }} with OS ${{ runner.os }}"
-
-          - name: Show runner name
-            run: echo "This job is running on runner $RUNNER_NAME with OS $RUNNER_OS"
-
-          - name: Show runner name
             run: echo "This job is running on runner $GITEA_RUNNER_NAME with OS $RUNNER_OS"
 
           - name: Checkout repository
