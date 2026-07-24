@@ -70,7 +70,7 @@
               username: ${{ secrets.DOCKER_DEPLOY_SSH_USERNAME }}
               key: ${{ secrets.DOCKER_DEPLOY_SSH_KEY }}
               script: |
-                cd src/DOCKER/testing-gitea-actions-hello-world
+                cd src/myair-to-mqtt
                 docker compose pull
                 docker compose up -d
 
