@@ -210,7 +210,7 @@ class Device_AdvantageAir(Device_Base):
 
     def set_mode(self, value):
         _da_logger.debug('{}: set_mode() value:{}'.format(self.__class__.__name__, value))
-        _da_logger.debug('set_mode(): current value == {}'.format(self.get_node('controle').get_property('mode').value))
+        _da_logger.debug('set_mode(): current value == {}'.format(self.get_node('controls').get_property('mode').value))
 
         current_homie_mode_state = self.get_node('controls').get_property('mode').value
 
