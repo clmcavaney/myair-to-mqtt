@@ -60,5 +60,19 @@
               #   MY_ARG=value
               # target: production
 
+          # This is obviously a bit hard coded, as it is presuming that there is a specific directory with an 
+          # existing docker-compose.yml file pointing to the image just created and pushed above.
+          # Good enough for my homelab setup.
+          - name: Deploy to host via SSH with a SSH key
+            uses: appleboy/ssh-action@v1
+            with:
+              host: ${{ secrets.DOCKER_DEPLOY_SSH_HOST }}
+              username: ${{ secrets.DOCKER_DEPLOY_SSH_USERNAME }}
+              key: ${{ secrets.DOCKER_DEPLOY_SSH_KEY }}
+              script: |
+                cd src/DOCKER/testing-gitea-actions-hello-world
+                docker compose pull
+                docker compose up -d
+
 # vim: ts=2 shiftwidth=2 expandtab
 # END OF FILE
