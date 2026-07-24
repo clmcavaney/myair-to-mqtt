@@ -1,5 +1,6 @@
 import datetime
 import zoneinfo
+import logging
 
 from homie.device_base import Device_Base
 from homie.node.node_base import Node_Base
@@ -12,11 +13,12 @@ from homie.node.property.property_button import Property_Button
 from homie.node.property.property_integer import Property_Integer
 from homie.node.property.property_datetime import Property_DateTime
 
-
 FAN_SPEEDS = ['low', 'medium', 'high']
 OPERATION_MODES = ['on', 'off', 'cool', 'heat', 'fan', 'dry']
 ZONE_STATES = ['open', 'close']
 SYSTEM_MODES = ['on', 'off']
+
+_da_logger = logging.getLogger(__name__)
 
 class Node_AdvantageAirZone(Node_Base):
     zone_details = None
@@ -33,7 +35,10 @@ class Node_AdvantageAirZone(Node_Base):
 
         # can't use self.debug here as the class variable hasn't been initialised at this point
         if debug:
-            print('{}: device {} id {} name {} type {}'.format(__class__.__name__, device, id, name, type))
+            _da_logger.setLevel(logging.DEBUG)
+        _da_logger.debug('{}: device {} id {} name {} type {}'.format(__class__.__name__, device, id, name, type))
+        _da_logger.info('{}:{}: initialising'.format(self.__class__.__name__, self.__init__.__name__))
+
         super().__init__(device, id, name, type_)
 
         self.zone_details = zone_details
@@ -70,19 +75,17 @@ class Node_AdvantageAirZone(Node_Base):
         )
 
 
-        if debug:
-            print('Node_AdvantageAirZone() details: topic:{} controls mode:{}'.format(super().topic, device.get_node('controls').get_property('mode').value))
-            print('super(): {}'.format(super()))
-            print('self.device: {}'.format(self.device))
-            print('Node_AdvantageAirZone() details: alternative method - controls mode:{}'.format(self.device.get_node('controls').get_property('mode').value))
+        _da_logger.debug('Node_AdvantageAirZone() details: topic:{} controls mode:{}'.format(super().topic, device.get_node('controls').get_property('mode').value))
+        _da_logger.debug('super(): {}'.format(super()))
+        _da_logger.debug('self.device: {}'.format(self.device))
+        _da_logger.debug('Node_AdvantageAirZone() details: alternative method - controls mode:{}'.format(self.device.get_node('controls').get_property('mode').value))
 
     def set_zone_temp_setpoint(self, value):
-        if self.debug:
-            print('{}: set_zone_temp_setpoint()'.format(self.__class__.__name__))
-            print(self.id)
-            print(self.name)
-            print('zone_details == {}'.format(self.zone_details))
-            print('myair_device == {}'.format(self.myair_device))
+        _da_logger.debug('{}: set_zone_temp_setpoint()'.format(self.__class__.__name__))
+        _da_logger.debug(self.id)
+        _da_logger.debug(self.name)
+        _da_logger.debug('zone_details == {}'.format(self.zone_details))
+        _da_logger.debug('myair_device == {}'.format(self.myair_device))
         # this is where we would set the temperature of the appropriate zone
         # e.g. setZone(id=3, state='on', set_temp=26)
         # self.myair_device.setZone()
@@ -90,10 +93,9 @@ class Node_AdvantageAirZone(Node_Base):
         
 
     def set_zone_state(self, value):
-        if self.debug:
-            print('{}: set_zone_state() value:{}'.format(self.__class__.__name__, value))
-            print(self.name)
-            print('set_zone_state(): current value == {}'.format(self.get_property('zone-state').value))
+        _da_logger.debug('{}: set_zone_state() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug(self.name)
+        _da_logger.debug('set_zone_state(): current value == {}'.format(self.get_property('zone-state').value))
 
         current_homie_zone_state = self.get_property('zone-state').value
 
@@ -105,9 +107,8 @@ class Node_AdvantageAirZone(Node_Base):
             self.set_zone_state_change_ts(True)
 
     def set_zone_mode(self, value):
-        if self.debug:
-            print('{}: set_zone_mode() value:{}'.format(self.__class__.__name__, value))
-            print(self.name)
+        _da_logger.debug('{}: set_zone_mode() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug(self.name)
         # Leveraging set_zone_state() logic, but essentially if the mode == off, state will be set to close, otherwise open
         _zone_state = 'open'
         if value == 'off':
@@ -120,9 +121,8 @@ class Node_AdvantageAirZone(Node_Base):
             self.device.get_node('controls').get_property('mode').set_value(value)
 
     def set_zone_state_change_ts(self, value):
-        if self.debug:
-            print('{}: set_zone_state_change_ts() value:{}'.format(self.__class__.__name__, value))
-            print(self.name)
+        _da_logger.debug('{}: set_zone_state_change_ts() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug(self.name)
            
         # value isn't important, when this function is called the ts value just needs to be updated
         self.get_property('zone-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
@@ -139,6 +139,8 @@ class Device_AdvantageAir(Device_Base):
         assert device_name, 'device name required'
         assert myair_device, 'myair_device must be supplied'
         assert myair_settings, 'myair_settings must be supplied'
+
+        _da_logger.info('{}:{}: initialising'.format(self.__class__.__name__, self.__init__.__name__))
 
         super().__init__(device_id, device_name, homie_settings, mqtt_settings)
 
@@ -180,8 +182,7 @@ class Device_AdvantageAir(Device_Base):
 
         # Zones
         for zone_id, zone_det in myair_device.zones.items():
-            if self.debug:
-                print('about to create a node - Node_AdvantageAirZone({}, {}, {})'.format(zone_id, zone_det['name'], 'zone'))
+            _da_logger.debug('about to create a node - Node_AdvantageAirZone({}, {}, {})'.format(zone_id, zone_det['name'], 'zone'))
             node = Node_AdvantageAirZone(self, zone_id, zone_det['name'], 'zone', zone_det, self.myair_device, debug=self.debug)
 
             node.get_property('tempsetpoint').value = zone_det['setTemp']
@@ -208,9 +209,8 @@ class Device_AdvantageAir(Device_Base):
         self.start()
 
     def set_mode(self, value):
-        if self.debug:
-            print('{}: set_mode() value:{}'.format(self.__class__.__name__, value))
-            print('set_mode(): current value == {}'.format(self.get_node('controle').get_property('mode').value))
+        _da_logger.debug('{}: set_mode() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug('set_mode(): current value == {}'.format(self.get_node('controle').get_property('mode').value))
 
         current_homie_mode_state = self.get_node('controls').get_property('mode').value
 
@@ -223,22 +223,19 @@ class Device_AdvantageAir(Device_Base):
             self.set_mode_state_change_ts(True)
 
     def set_fan_speed(self, value):
-        if self.debug:
-            print('{}: set_fan_speed() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug('{}: set_fan_speed() value:{}'.format(self.__class__.__name__, value))
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('fan_speed').value = value
         self.myair_device.fanspeed = value
 
     def set_myzone(self, value):
-        if self.debug:
-            print('{}: set_myzone() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug('{}: set_myzone() value:{}'.format(self.__class__.__name__, value))
         # no need for this, the underlying base class deals with this
         # self.get_node('controls').get_property('fan_speed').value = value
         self.myair_device.myzone = value
 
     def set_mode_state_change_ts(self, value):
-        if self.debug:
-            print('{}: set_mode_state_change_ts() value:{}'.format(self.__class__.__name__, value))
+        _da_logger.debug('{}: set_mode_state_change_ts() value:{}'.format(self.__class__.__name__, value))
         
         self.get_node('controls').get_property('mode-state-change-ts').value = datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime('%Y-%m-%dT%H:%M:%S.%f')
 
@@ -246,16 +243,15 @@ class Device_AdvantageAir(Device_Base):
         return datetime.datetime.now(zoneinfo.ZoneInfo("Australia/Melbourne")).strftime("%d/%m/%Y %H:%M:%S%z")
 
     def update(self):
-        if self.debug:
-            print('{}: update()'.format(self.__class__.__name__))
+        _da_logger.debug('{}: update()'.format(self.__class__.__name__))
 
         # sometimes the device isn't contactable - handle that here
         try:
             self.myair_device.update()
         except requests.exceptions.ConnectionError as e:
-            if self.debug:
-                print('{}: unable to get update from myair_device'.format(self.__class__.__name__))
-                print('{}: exception: {}'.format(self.__class__.__name__, e))
+            _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
+            # this will include the complete traceback
+            _da_logger.exception('{}: exception: {}'.format(self.__class__.__name__))
             # silently ignore
             return
 
