@@ -248,11 +248,15 @@ class Device_AdvantageAir(Device_Base):
         # sometimes the device isn't contactable - handle that here
         try:
             self.myair_device.update()
-        except requests.exceptions.ConnectionError as e:
+        except ConnectionError as e:
             _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
             # this will include the complete traceback
-            _da_logger.exception('{}: exception: {}'.format(self.__class__.__name__))
-            # silently ignore
+            _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__))
+            # no point continuing at this point, just return from this update attempt
+            return
+        except Exception as e:
+            _da_logger.exception('{}: unknown exception: {}'.format(self.__class__.__name__))
+            # no point continuing at this point, just return from this update attempt
             return
 
         # Controls
