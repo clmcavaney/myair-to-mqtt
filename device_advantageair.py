@@ -81,7 +81,7 @@ class Node_AdvantageAirZone(Node_Base):
         _da_logger.debug('self.device: {}'.format(self.device))
         _da_logger.debug('Node_AdvantageAirZone() details: alternative method - controls mode:{}'.format(self.device.get_node('controls').get_property('mode').value))
 
-    def _round_and_int_number(value):
+    def _round_and_int_number(self, value):
         return math.floor(value + 0.5)
 
     def set_zone_temp_setpoint(self, value):
