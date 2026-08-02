@@ -1,6 +1,7 @@
 import datetime
 import zoneinfo
 import logging
+import math
 
 from homie.device_base import Device_Base
 from homie.node.node_base import Node_Base
@@ -80,16 +81,20 @@ class Node_AdvantageAirZone(Node_Base):
         _da_logger.debug('self.device: {}'.format(self.device))
         _da_logger.debug('Node_AdvantageAirZone() details: alternative method - controls mode:{}'.format(self.device.get_node('controls').get_property('mode').value))
 
+    def _round_and_int_number(value):
+        return math.floor(value + 0.5)
+
     def set_zone_temp_setpoint(self, value):
         _da_logger.debug('{}: set_zone_temp_setpoint()'.format(self.__class__.__name__))
         _da_logger.debug(self.id)
         _da_logger.debug(self.name)
         _da_logger.debug('zone_details == {}'.format(self.zone_details))
         _da_logger.debug('myair_device == {}'.format(self.myair_device))
+        _da_logger.debug('value == {} (rounded {})'.format(value, self._round_and_int_number(value)))
         # this is where we would set the temperature of the appropriate zone
         # e.g. setZone(id=3, state='on', set_temp=26)
         # self.myair_device.setZone()
-        self.myair_device.setZone(id=self.zone_details['number'], set_temp=value)
+        self.myair_device.setZone(id=self.zone_details['number'], set_temp=self._round_and_int_number(value))
         
 
     def set_zone_state(self, value):
