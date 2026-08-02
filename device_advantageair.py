@@ -253,7 +253,7 @@ class Device_AdvantageAir(Device_Base):
         # sometimes the device isn't contactable - handle that here
         try:
             self.myair_device.update()
-        except ConnectTimeoutError as e:
+        except ConnectTimeout as e:
             _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
             # this will include the complete traceback
             _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__))
