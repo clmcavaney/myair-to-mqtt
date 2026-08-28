@@ -2,6 +2,7 @@ import datetime
 import zoneinfo
 import logging
 import math
+import requests
 
 from homie.device_base import Device_Base
 from homie.node.node_base import Node_Base
@@ -259,7 +260,7 @@ class Device_AdvantageAir(Device_Base):
             _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__))
             # no point continuing at this point, just return from this update attempt
             return
-        except ConnectionError as e:
+        except requests.exceptions.ConnectionError as e:
             _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
             # this will include the complete traceback
             _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__))
