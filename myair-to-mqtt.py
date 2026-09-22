@@ -98,11 +98,28 @@ def main():
         print(myair_to_mqtt_settings)
 
     ma = MyAir(myair_settings['myair_addr'])
-    ma.update()
+    # sometimes the device isn't contactable - handle that here
+    try:
+        ma.update()
+    except requests.exceptions.ConnectTimeout as e:
+        _logger.info('{}: unable to get update from MyAir'.format('main'))
+        # this will include the complete traceback
+        _logger.exception('{}: ConnectionError exception: {}'.format('main'), e)
+        pass
+    except requests.exceptions.ConnectionError as e:
+        _logger.info('{}: unable to get update from MyAir'.format('main'))
+        # this will include the complete traceback
+        _logger.exception('{}: ConnectionError exception: {}'.format('main'), e)
+        pass
+    except Exception as e:
+        _logger.info('{}: while updating MyAir'.format('main'))
+        _logger.exception('{}: unknown exception: {}'.format('main'), e)
+        pass
 
     _myair_device = Device_AdvantageAir(device_id='advantageair', device_name='AdvantageAir', homie_settings=HOMIE_SETTINGS, mqtt_settings=mqtt_settings, myair_device=ma, myair_settings=myair_settings, debug=debug)
 
     return _myair_device, myair_to_mqtt_settings
+
 
 if __name__ == "__main__":
     print('starting')
