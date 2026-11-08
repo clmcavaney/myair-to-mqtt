@@ -3,6 +3,7 @@ import zoneinfo
 import logging
 import math
 import requests
+import time
 
 from homie.device_base import Device_Base
 from homie.node.node_base import Node_Base
@@ -137,6 +138,9 @@ class Node_AdvantageAirZone(Node_Base):
 class Device_AdvantageAir(Device_Base):
     myair_device = None
     debug = None
+    update_max_retries = 3
+    update_delay = 5
+    update_attempt = 0
 
     def __init__(
         self, device_id=None, device_name=None, homie_settings=None, mqtt_settings=None, myair_device=None, debug=False, myair_settings=None
@@ -252,24 +256,36 @@ class Device_AdvantageAir(Device_Base):
         _da_logger.debug('{}: update()'.format(self.__class__.__name__))
 
         # sometimes the device isn't contactable - handle that here
-        try:
-            self.myair_device.update()
-        except requests.exceptions.ConnectTimeout as e:
-            _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
-            # this will include the complete traceback
-            _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__, e))
-            # no point continuing at this point, just return from this update attempt
-            return
-        except requests.exceptions.ConnectionError as e:
-            _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
-            # this will include the complete traceback
-            _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__, e))
-            # no point continuing at this point, just return from this update attempt
-            return
-        except Exception as e:
-            _da_logger.exception('{}: unknown exception: {}'.format(self.__class__.__name__, e))
-            # no point continuing at this point, just return from this update attempt
-            return
+        while self.update_attempt < self.update_max_retries:
+            try:
+                self.myair_device.update()
+                # success - exit loop
+                break
+            except requests.exceptions.ConnectTimeout as e:
+                self.update_attempt += 1
+                _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
+                # this will include the complete traceback
+                _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__, e))
+                if self.update_attempt >= self.update_max_retries:
+                    raise
+                _da_logger.info('{}: attempt {} failed - retrying in {} seconds'.format(self.__class__.__name__, self.udate_attempt, self.update_delay))
+                time.sleep(self.update_delay)
+            except requests.exceptions.ConnectionError as e:
+                self.update_attempt += 1
+                _da_logger.info('{}: unable to get update from myair_device'.format(self.__class__.__name__))
+                # this will include the complete traceback
+                _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__, e))
+                if self.update_attempt >= self.update_max_retries:
+                    raise
+                _da_logger.info('{}: attempt {} failed - retrying in {} seconds'.format(self.__class__.__name__, self.udate_attempt, self.update_delay))
+                time.sleep(self.update_delay)
+            except Exception as e:
+                _da_logger.exception('{}: unknown exception: {}'.format(self.__class__.__name__, e))
+                # no point continuing at this point, just return from this update attempt
+                return
+
+        # reset attempt counter
+        self.update_attempt = 0
 
         # Controls
         # mode will be one of OPERATION_MODES + 'off' - therefore, if it says off it's off otherwise it must be on
