@@ -1,4 +1,4 @@
-    name: Build and Push Docker Image
+    name: Build, push Docker image AND deploy
 
     on:
       push:
@@ -9,7 +9,7 @@
 #          - main
 
     jobs:
-      build-and-push:
+      build-push-and-deploy:
         runs-on: ubuntu-latest # Or your custom runner label if using a self-hosted runner
         steps:
           - name: Show runner name
