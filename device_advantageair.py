@@ -268,7 +268,7 @@ class Device_AdvantageAir(Device_Base):
                 _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__, e))
                 if self.update_attempt >= self.update_max_retries:
                     raise
-                _da_logger.info('{}: attempt {} failed - retrying in {} seconds'.format(self.__class__.__name__, self.udate_attempt, self.update_delay))
+                _da_logger.info('{}: attempt {} failed - retrying in {} seconds'.format(self.__class__.__name__, self.update_attempt, self.update_delay))
                 time.sleep(self.update_delay)
             except requests.exceptions.ConnectionError as e:
                 self.update_attempt += 1
@@ -277,7 +277,7 @@ class Device_AdvantageAir(Device_Base):
                 _da_logger.exception('{}: ConnectionError exception: {}'.format(self.__class__.__name__, e))
                 if self.update_attempt >= self.update_max_retries:
                     raise
-                _da_logger.info('{}: attempt {} failed - retrying in {} seconds'.format(self.__class__.__name__, self.udate_attempt, self.update_delay))
+                _da_logger.info('{}: attempt {} failed - retrying in {} seconds'.format(self.__class__.__name__, self.update_attempt, self.update_delay))
                 time.sleep(self.update_delay)
             except Exception as e:
                 _da_logger.exception('{}: unknown exception: {}'.format(self.__class__.__name__, e))
