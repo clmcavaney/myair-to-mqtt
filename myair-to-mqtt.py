@@ -12,6 +12,7 @@ import time
 import homie
 import schedule
 import logging
+import requests
 
 _version=0.16
 _logger = logging.getLogger(__name__)
