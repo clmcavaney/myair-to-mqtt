@@ -105,16 +105,16 @@ def main():
     except requests.exceptions.ConnectTimeout as e:
         _logger.info('{}: unable to get update from MyAir'.format('main'))
         # this will include the complete traceback
-        _logger.exception('{}: ConnectionError exception: {}'.format('main'), e)
+        _logger.exception('{}: ConnectionError exception: {}'.format('main', e))
         pass
     except requests.exceptions.ConnectionError as e:
         _logger.info('{}: unable to get update from MyAir'.format('main'))
         # this will include the complete traceback
-        _logger.exception('{}: ConnectionError exception: {}'.format('main'), e)
+        _logger.exception('{}: ConnectionError exception: {}'.format('main', e))
         pass
     except Exception as e:
         _logger.info('{}: while updating MyAir'.format('main'))
-        _logger.exception('{}: unknown exception: {}'.format('main'), e)
+        _logger.exception('{}: unknown exception: {}'.format('main', e))
         pass
 
     _myair_device = Device_AdvantageAir(device_id='advantageair', device_name='AdvantageAir', homie_settings=HOMIE_SETTINGS, mqtt_settings=mqtt_settings, myair_device=ma, myair_settings=myair_settings, debug=debug)
